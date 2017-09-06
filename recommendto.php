@@ -1,0 +1,50 @@
+<?php
+   session_start();
+   if(!isset($_SESSION['user'])) header('location:login.php');
+   $dbc= mysqli_connect('localhost','root','','musicplayer');
+   $usersession=$_SESSION['user'];
+   
+   $recommendto = $_GET['recommendto'];
+   $songname = $_GET['songname'];
+   $sql2="SELECT songid FROM songs WHERE title='$songname'";
+   $result2 = $dbc->query($sql2);
+
+   if ($result2->num_rows ==1)
+   {
+      $row2=$result2->fetch_assoc();
+      $songid=$row2["songid"];
+
+   }
+   $query = "SELECT * FROM user WHERE email = '$recommendto'";
+      
+   $data= mysqli_query($dbc,$query);
+   $row2 = mysqli_fetch_array($data);
+   $display_string = "<div>";
+   $display_string .= "<table>";
+   
+
+if($_SESSION['user']==$row2['userid'])
+   {
+   echo '<p style="color:red;">*You Cannot Recommend Yourself</p>';
+   }
+else if(mysqli_num_rows($data))
+{
+   while($row = mysqli_fetch_array($data)) {
+      //echo $row['username'];
+      $display_string .= "<tr>";
+      $display_string .= "<td>$row[username]</td>";
+      $display_string .= "<td>$row[email]</td>";
+      $display_string .= "<td><a href='recommendthis.php?touser=$row[userid]&songid=$songid'>Recommend This User</a></td>";
+      $display_string .= "</tr>";
+   }
+}
+else
+{
+echo '<p style="color:red;">*No Such User Exist</p>';
+}
+
+   
+   $display_string .= "</table>";
+   $display_string .= "</div>";
+   echo $display_string;
+?>
